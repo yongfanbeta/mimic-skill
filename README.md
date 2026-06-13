@@ -1,8 +1,8 @@
 # mimic-skill 🏥
 
-> OpenClaw Skill for querying the **MIMIC-IV** critical care database
+> AI Skill for querying the **MIMIC-IV** critical care database
 
-An [OpenClaw](https://github.com/openclaw/openclaw) skill that helps AI agents query the [MIMIC-IV](https://mimic.mit.edu/docs/IV/) clinical database. When a user asks for ICU patient data — vital signs, lab results, diagnoses, comorbidities — the agent reads the skill's reference docs and generates ready-to-run SQL or Python code tailored to the request.
+An AI agent skill that helps query the [MIMIC-IV](https://mimic.mit.edu/docs/IV/) clinical database. When a user asks for ICU patient data — vital signs, lab results, diagnoses, comorbidities — the agent reads the skill's reference docs and generates ready-to-run SQL or Python code tailored to the request.
 
 ## How It Works
 
@@ -30,19 +30,19 @@ Depending on the user's request, the agent will produce:
 
 ## Installation
 
-### Option 1: Via SkillHub (recommended)
+### Option 1: Clone into your AI agent's skills/knowledge directory
+
+```bash
+git clone https://github.com/yongfanbeta/mimic-skill.git <your-agent-skills-dir>/mimic-skill
+```
+
+### Option 2: Via SkillHub (for OpenClaw users)
 
 ```bash
 openclaw skill install mimic-skill
 ```
 
-### Option 2: Clone into skills directory
-
-```bash
-git clone https://github.com/yongfanbeta/mimic-skill.git ~/.qclaw/skills/mimic-skill
-```
-
-After installation, the skill is automatically available in your OpenClaw agent. No additional configuration needed.
+After installation, the skill is automatically available in your AI agent. No additional configuration needed.
 
 ## File Structure
 
