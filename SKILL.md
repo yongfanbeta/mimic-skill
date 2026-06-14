@@ -3,101 +3,101 @@ name: mimic-skill
 description: 从 MIMIC-IV 重症监护数据库中提取数据的专用技能。当用户提到 MIMIC、MIMIC-IV、查询 MIMIC 数据、提取 ICU 患者数据（生命体征/实验室检查/诊断/合并症）且涉及 MIMIC 数据库时使用此技能。支持 SQL 和 Python (psycopg2) 两种查询方式，数据通过 PostgreSQL 连接。
 ---
 
-# MIMIC-IV 数据提取技能
+# MIMIC-IV Data Extraction Skill
 
-从 MIMIC-IV 数据库中提取重症监护数据。提供 SQL 模板和 Python 代码，用户自行处理数据库连接。
+Extract intensive care data from the MIMIC-IV database. Provides SQL templates and Python code; users handle database connections themselves.
 
-## 连接方式
+## Connection Method
 
-用户提供自己的 PostgreSQL 连接参数。本技能只提供查询代码。
+Users provide their own PostgreSQL connection parameters. This skill only provides query code.
 
-## MIMIC-IV 重要变更（vs MIMIC-III）
+## Important Changes in MIMIC-IV (vs MIMIC-III)
 
-⚠️ **如果使用过 MIMIC-III，请务必注意以下变更！**
+⚠️ **If you have used MIMIC-III, please note the following changes!**
 
-### 1. 表名变更
+### 1. Table Name Changes
 
-| MIMIC-III (❌ 已废弃) | MIMIC-IV (✅ 正确使用) | 说明 |
+| MIMIC-III (❌ Deprecated) | MIMIC-IV (✅ Correct Usage) | Description |
 |---------------------------|--------------------------|------|
-| `icustay_id` | `stay_id` | ICU 住院 ID |
-| `inputevents_mv` | `inputevents` | 输入事件（合并了 mv 和 cv）|
-| `inputevents_cv` | `inputevents` | 已合并到 `inputevents` |
-| `procedureevents_mv` | `procedureevents` | 操作事件 |
-| `datetimeevents` | `datetimeevents` | 新增表（日期时间事件）|
-| `ingredientevents` | `ingredientevents` | 新增表（药物成分事件）|
+| `icustay_id` | `stay_id` | ICU stay ID |
+| `inputevents_mv` | `inputevents` | Input events (merged mv and cv)|
+| `inputevents_cv` | `inputevents` | Merged into `inputevents` |
+| `procedureevents_mv` | `procedureevents` | Procedure events |
+| `datetimeevents` | `datetimeevents` | New table (datetime events)|
+| `ingredientevents` | `ingredientevents` | New table (drug ingredient events)|
 
-### 2. 新增表（MIMIC-IV）
+### 2. New Tables (MIMIC-IV)
 
-| 表名 | 说明 |
+| Table Name | Description |
 |--------|------|
-| `ingredientevents` | 药物活性成分事件 |
-| `datetimeevents` | 日期时间事件 |
-| `emar` | 电子药历管理记录 |
-| `emar_detail` | 电子药历详细记录 |
-| `poe` | 医嘱记录（Provider Order Entry）|
-| `poe_detail` | 医嘱详细记录 |
+| `ingredientevents` | Drug active ingredient events |
+| `datetimeevents` | Datetime events |
+| `emar` | Electronic medication administration record |
+| `emar_detail` | Electronic medication administration detail |
+| `poe` | Provider order entry records |
+| `poe_detail` | Provider order entry detail |
 
-### 3. 新增模块（MIMIC-IV）
+### 3. New Modules (MIMIC-IV)
 
-MIMIC-IV 现在分为 **6 个模块**：
+MIMIC-IV is now divided into **6 modules**:
 
-| 模块 | 说明 | 主要表 |
+| Module | Description | Main Tables |
 |------|------|--------|
-| **hosp** | 医院级数据 | patients, admissions, labevents, diagnoses_icd, etc. |
-| **icu** | ICU 级数据 | icustays, chartevents, inputevents, etc. |
-| **ed** | 急诊科数据 | edstays, edcharting, etc. |
-| **cxr** | 胸片元数据 | cxr_records, cxr_paths, etc. |
-| **note** | 临床笔记 | discharges, echos, etc. |
-| **ecg** | 心电图数据 | ecg_records, ecg_paths, etc. |
+| **hosp** | Hospital-level data | patients, admissions, labevents, diagnoses_icd, etc. |
+| **icu** | ICU-level data | icustays, chartevents, inputevents, etc. |
+| **ed** | Emergency department data | edstays, edcharting, etc. |
+| **cxr** | Chest X-ray metadata | cxr_records, cxr_paths, etc. |
+| **note** | Clinical notes | discharges, echos, etc. |
+| **ecg** | ECG data | ecg_records, ecg_paths, etc. |
 
-### 4. 字段名规范
+### 4. Field Name Conventions
 
-✅ **正确** (小写):
+✅ **Correct** (lowercase):
 ```sql
 SELECT ce.subject_id, ce.stay_id, ce.itemid, ce.charttime
 FROM chartevents ce
 WHERE ce.stay_id = 100001
 ```
 
-❌ **错误** (camelCase 或旧字段名):
+❌ **Incorrect** (camelCase or old field names):
 ```sql
-SELECT ce.subjectId, ce.icustay_id  -- 字段不存在！
+SELECT ce.subjectId, ce.icustay_id  -- Field does not exist!
 FROM chartevents ce
 ```
 
 ---
 
-## 支持的查询类型
+## Supported Query Types
 
-| 查询类型 | 参考文件 |
+| Query Type | Reference File |
 |---------|---------|
-| 生命体征 | references/vital_signs.md |
-| 生化指标 | references/labs.md |
-| 诊断与合并症 | references/diagnoses.md |
-| 数据库 Schema | references/schema.md |
-| 常用查询模板 | references/common_queries.md |
+| Vital Signs | references/vital_signs.md |
+| Laboratory Tests | references/labs.md |
+| Diagnoses and Comorbidities | references/diagnoses.md |
+| Database Schema | references/schema.md |
+| Common Query Templates | references/common_queries.md |
 
-## 工作流程
+## Workflow
 
-1. 确认用户需要的查询类型
-2. 读取对应的 references 文件获取 SQL/Python 模板
-3. 根据用户具体需求调整查询条件
-4. 同时提供 SQL 和 Python 两种实现
-5. 说明如何自定义参数（如时间范围、itemid 等）
+1. Confirm the query type needed by the user
+2. Read the corresponding references file to get SQL/Python templates
+3. Adjust query conditions based on specific user requirements
+4. Provide both SQL and Python implementations
+5. Explain how to customize parameters (e.g., time range, itemid, etc.)
 
-## 关键约定
+## Key Conventions
 
-- MIMIC-IV 使用 `stay_id` 作为 ICU 住院标识（**非 MIMIC-III 的 `icustay_id`**）
-- `anchor_age` 截断处理（>89 统一为 91）
-- `chartevents` 通过 `stay_id` 关联，`labevents` 通过 `hadm_id` 关联
-- `itemid` 来自 `d_items`（生命体征）和 `d_labitems`（实验室检查）
-- **时间表示**: MIMIC-IV 使用绝对时间戳（`TIMESTAMP` 类型），可直接使用时间函数
+- MIMIC-IV uses `stay_id` as the ICU stay identifier (**not MIMIC-III's `icustay_id`**)
+- `anchor_age` is truncated (patients >89 are all set to 91)
+- `chartevents` is linked via `stay_id`, `labevents` via `hadm_id`
+- `itemid` comes from `d_items` (vital signs) and `d_labitems` (lab tests)
+- **Time representation**: MIMIC-IV uses absolute timestamps (`TIMESTAMP` type), time functions can be used directly
 
 ---
 
-## 常用查询场景
+## Common Query Scenarios
 
-### 1. 提取 ICU 第一天生命体征
+### 1. Extract First Day Vital Signs in ICU
 
 ```sql
 SELECT 
@@ -118,7 +118,7 @@ WHERE ce.charttime >= ic.intime
 ORDER BY ce.stay_id, ce.charttime;
 ```
 
-### 2. 提取 ICU 第一天实验室检查
+### 2. Extract First Day Laboratory Tests in ICU
 
 ```sql
 SELECT 
@@ -139,7 +139,7 @@ WHERE le.charttime >= a.admittime
 ORDER BY le.subject_id, le.charttime;
 ```
 
-### 3. 提取患者诊断（ICD 编码）
+### 3. Extract Patient Diagnoses (ICD Codes)
 
 ```sql
 SELECT 
@@ -158,46 +158,46 @@ ORDER BY d.seq_num;
 
 ---
 
-## 注意事项
+## Notes
 
-### 1. 表名和字段名大小写
+### 1. Table and Field Name Case Sensitivity
 
-- **全部小写**: MIMIC-IV 所有表名和字段名均为小写
-- **使用双引号**: 如果必须使用大写或驼峰命名，需用双引号括起来（不推荐）
+- **All lowercase**: All table and field names in MIMIC-IV are lowercase
+- **Use double quotes**: If you must use uppercase or camelCase names, wrap them in double quotes (not recommended)
 
-### 2. 时间处理
+### 2. Time Handling
 
-- **绝对时间戳**: 所有时间字段均为 `TIMESTAMP` 类型（UTC 时区）
-- **时间函数**: 可直接使用 `EXTRACT`, `DATE_PART`, `INTERVAL` 等函数
-- **时区转换**: 如需本地时间，使用 `AT TIME ZONE`
+- **Absolute timestamps**: All time fields are `TIMESTAMP` type (UTC timezone)
+- **Time functions**: You can directly use functions like `EXTRACT`, `DATE_PART`, `INTERVAL`
+- **Timezone conversion**: Use `AT TIME ZONE` for local time conversion
 
 ```sql
--- 转换为本地时间（如东部时间）
+-- Convert to local time (e.g., Eastern Time)
 SELECT charttime AT TIME ZONE 'America/New_York'
 FROM chartevents
 WHERE stay_id = 100001;
 ```
 
-### 3. 大表查询优化
+### 3. Large Table Query Optimization
 
-- `chartevents` 表有 **数亿行**，查询时务必：
-  - 使用 `stay_id` 过滤
-  - 限定 `charttime` 范围
-  - 添加 `LIMIT` 子句（测试时）
-  - 使用 `EXPLAIN` 分析查询计划
+- The `chartevents` table has **hundreds of millions of rows**; when querying, be sure to:
+  - Filter by `stay_id`
+  - Limit the `charttime` range
+  - Add a `LIMIT` clause (for testing)
+  - Use `EXPLAIN` to analyze the query plan
 
-### 4. 数值型 vs 文本型结果
+### 4. Numeric vs Text Results
 
-- `valuenum`: 数值型结果（用于计算）
-- `value`: 文本型结果（用于定性结果，如 "Positive", "Negative"）
+- `valuenum`: Numeric results (for calculations)
+- `value`: Text results (for qualitative results, e.g., "Positive", "Negative")
 
 ```sql
--- 正确：数值型结果用 valuenum
+-- Correct: Use valuenum for numeric results
 SELECT AVG(valuenum) AS avg_creatinine
 FROM labevents
 WHERE itemid = 50912 AND valuenum IS NOT NULL;
 
--- 正确：文本型结果用 value
+-- Correct: Use value for text results
 SELECT COUNT(*) AS num_positive
 FROM labevents
 WHERE itemid = 500061 AND value = 'Positive';
@@ -205,17 +205,17 @@ WHERE itemid = 500061 AND value = 'Positive';
 
 ---
 
-## 参考链接
+## Reference Links
 
-- **MIMIC-IV 官方文档**: https://mimic.mit.edu/docs/IV/
-- **MIMIC-IV 数据介绍**: https://physionet.org/content/mimiciv/3.1/
-- **MIMIC-IV-ED 数据介绍**: https://physionet.org/content/mimic-iv-ed/2.0/
-- **MIMIC-IV-Note 数据介绍**: https://physionet.org/content/mimic-iv-note/2.0/
-- **MIMIC-CXR 数据介绍**: https://physionet.org/content/mimic-cxr/2.1/
-- **访问申请**: https://physionet.org/register/
+- **MIMIC-IV Official Documentation**: https://mimic.mit.edu/docs/IV/
+- **MIMIC-IV Data Introduction**: https://physionet.org/content/mimiciv/3.1/
+- **MIMIC-IV-ED Data Introduction**: https://physionet.org/content/mimic-iv-ed/2.0/
+- **MIMIC-IV-Note Data Introduction**: https://physionet.org/content/mimic-iv-note/2.0/
+- **MIMIC-CXR Data Introduction**: https://physionet.org/content/mimic-cxr/2.1/
+- **Access Application**: https://physionet.org/register/
 - **MIMIC Code Repository**: https://github.com/MIT-LCP/mimic-code
 
 ---
 
-**最后更新**: 2026-05-20  
-**更新人**: 悟空（基于 MIMIC-IV 官方文档修正）
+**Last Updated**: 2026-05-20  
+**Updated by**: 悟空（基于 MIMIC-IV 官方文档修正）
