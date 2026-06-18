@@ -1,110 +1,89 @@
-# mimic-skill 🏥
+# MIMIC-Skill
 
-> AI Skill for querying the **MIMIC-IV** critical care database
+从 MIMIC-IV 重症监护数据库提取 ICU 患者数据的 OpenClaw Skill。
 
-An AI agent skill that helps query the [MIMIC-IV](https://mimic.mit.edu/docs/IV/) clinical database. When a user asks for ICU patient data — vital signs, lab results, diagnoses, comorbidities — the agent reads the skill's reference docs and generates ready-to-run SQL or Python code tailored to the request.
+提供 SQL 和 Python (psycopg2) 查询模板，支持提取生命体征、实验室检查、诊断、合并症等数据。
 
-## How It Works
+## 🚀 一键安装（推荐）
 
-```
-User asks: "提取 MIMIC-IV 中 AMI 患者第一天的生命体征和肌酐"
-        ↓
-Agent loads mimic-skill → reads relevant reference files
-        ↓
-Agent generates custom SQL/Python code with correct table names, itemid mappings, and filters
-        ↓
-User runs the code against their own PostgreSQL database
-```
-
-**This skill does NOT connect to any database.** It provides the knowledge (schema, field mappings, query patterns) so that an AI agent can write correct queries. Users run the queries themselves against their own MIMIC-IV instance.
-
-## What It Generates
-
-Depending on the user's request, the agent will produce:
-
-| Output | When | Example |
-|--------|------|---------|
-| **SQL queries** | User wants to run directly in psql / pgAdmin / DBeaver | `SELECT ... FROM chartevents WHERE stay_id = ...` |
-| **Python scripts** | User wants programmatic access via psycopg2 + pandas | `extract_vital_signs(patient_ids=[...])` |
-| **Data extraction pipeline** | Complex multi-step requests | Combined scripts that join vitals + labs + diagnoses into a flat table |
-
-## Installation
-
-### Option 1: Clone into your AI agent's skills/knowledge directory
+### OpenClaw / QClaw 用户
 
 ```bash
-git clone https://github.com/yongfanbeta/mimic-skill.git <your-agent-skills-dir>/mimic-skill
+# 方法1：通过 skillhub 一键安装（推荐）
+skillhub install mimic-skill
+
+# 方法2：通过 ClawHub 安装
+openclaw skill install https://clawhub.ai/skills/mimic-skill
+
+# 方法3：本地安装（已下载 .skill 文件）
+openclaw skill install ./mimic-skill.skill
 ```
 
-### Option 2: Via SkillHub (for OpenClaw users)
+### Claude Code / Cursor / Windsurf 用户
 
 ```bash
-openclaw skill install mimic-skill
+# 下载 .skill 文件
+curl -L -o mimic-skill.skill \
+  https://github.com/yongfanbeta/mimic-skill/releases/download/v1.0.0/mimic-skill.skill
+
+# 安装（假设你的智能体支持 openclaw CLI）
+openclaw skill install mimic-skill.skill
 ```
 
-After installation, the skill is automatically available in your AI agent. No additional configuration needed.
+### 手动安装（所有智能体通用）
 
-## File Structure
+1. 从 [Releases](https://github.com/yongfanbeta/mimic-skill/releases) 下载 `mimic-skill.skill`
+2. 将文件重命名为 `mimic-skill.zip` 并解压
+3. 将解压后的 `mimic-skill/` 文件夹复制到智能体的 skills 目录（例如 `~/.qclaw/skills/`）
+4. 重启智能体
 
-```
-mimic-skill/
-├── SKILL.md                        # Core skill definition & usage guide
-├── README.md                       # This file
-├── LICENSE                         # MIT
-└── references/
-    ├── schema.md                   # Full database schema (6 modules: hosp, icu, ed, cxr, note, ecg)
-    ├── vital_signs.md              # Vital signs: HR, BP, SpO2, Temperature, RR + itemid mappings
-    ├── labs.md                     # Lab results: Creatinine, BUN, Lactate, WBC, etc. + itemid mappings
-    ├── diagnoses.md                # ICD diagnoses & comorbidity extraction
-    └── common_queries.md           # SOFA score, mechanical ventilation, vasopressors, AKI staging, Sepsis-3
+## 📖 使用方法
+
+```python
+# 示例：查询 MIMIC-IV 数据
+请帮我提取 MIMIC-IV 数据库中第一个 ICU 停留的生命体征数据
 ```
 
-## What's Inside
+## 🔍 支持的查询类型
 
-### Key References
+| 查询类型 | 说明 |
+|---------|------|
+| 生命体征 | 心率、血压、体温、呼吸频率等 |
+| 实验室检查 | 肌酐、胆红素、血常规、电解质等 |
+| 诊断与合并症 | ICD 编码、APACHE IV 评分等 |
+| 数据库 Schema | MIMIC-IV 表结构和字段说明 |
 
-| File | What It Covers |
-|------|---------------|
-| `schema.md` | All 6 MIMIC-IV modules, table relationships, field definitions |
-| `vital_signs.md` | `chartevents` itemid → vital sign mapping, 1st/24h/entire-stay extraction templates |
-| `labs.md` | `labevents` itemid → lab test mapping, common lab panels |
-| `diagnoses.md` | ICD-9/10 code lookup, comorbidity (Charlson/Elixhauser) extraction |
-| `common_queries.md` | Pre-built concepts: SOFA, ventilation status, vasopressors, KDIGO AKI, Sepsis-3 |
+## ⚠️ 重要提示
 
-### MIMIC-III → MIMIC-IV Migration
+1. **MIMIC-IV 变化**（vs MIMIC-III）：
+   - 表名变化：`icustay_id` → `stay_id`
+   - 新表：`ingredientevents`, `datetimeevents`, `emar` 等
+   - 模块化：分为 hosp、icu、ed、cxr、note、ecg 6 个模块
 
-The skill includes a built-in migration guide covering:
-- `icustay_id` → `stay_id`
-- `inputevents_mv/cv` → `inputevents` (merged)
-- New tables: `ingredientevents`, `datetimeevents`, `emar`, `poe`
-- New modules: `ed`, `cxr`, `note`, `ecg`
-- Field naming: all lowercase, snake_case
+2. **数据库连接**：
+   - 本 Skill 只提供查询代码模板
+   - 用户需自行提供 PostgreSQL 连接参数
 
-## Usage Examples
+3. **字段命名**：
+   - 全部小写（例如：`stay_id`, `charttime`）
+   - 不要用驼峰命名（例如：`stayId`, `chartTime`）
 
-After installing, just talk to your OpenClaw agent naturally:
+## 📚 参考资料
 
-| What You Say | What The Agent Does |
-|-------------|-------------------|
-| "帮我从 MIMIC-IV 提取 AMI 患者第一天的生命体征" | Reads `vital_signs.md`, generates SQL with correct itemid filters |
-| "MIMIC 里怎么算 SOFA 评分？" | Reads `common_queries.md`, outputs SOFA calculation query |
-| "我要提取肌酐和 BUN 的趋势数据" | Reads `labs.md`, generates Python script with itemid mapping |
-| "MIMIC-III 的 icustay_id 在 IV 里叫什么？" | Answers from migration guide: `stay_id` |
-| "帮我筛 Sepsis-3 患者" | Reads `common_queries.md`, generates Sepsis-3 identification query |
+- [MIMIC-IV 官方文档](https://mimic.mit.edu/docs/IV/)
+- [MIMIC-IV 数据介绍](https://physionet.org/content/mimiciv/3.1/)
+- [MIMIC Code 仓库](https://github.com/MIT-LCP/mimic-code)
+- [访问申请](https://physionet.org/register/)
 
-## Important Notes
+## 📦 发布文件
 
-- **No database access**: This skill only provides query knowledge. You need your own MIMIC-IV PostgreSQL instance.
-- **Access required**: Apply for MIMIC-IV access at [PhysioNet](https://physionet.org/register/).
-- **Big table warning**: `chartevents` has hundreds of millions of rows. Always filter by `stay_id` + time range.
-- **Age truncation**: `anchor_age > 89` is set to 91 (per MIMIC policy).
+- **GitHub Releases**: [v1.0.0](https://github.com/yongfanbeta/mimic-skill/releases/tag/v1.0.0)
+- **ClawHub**: [mimic-skill](https://clawhub.ai/skills/mimic-skill)
 
-## References
+## 🤝 贡献
 
-- [MIMIC-IV Documentation](https://mimic.mit.edu/docs/IV/)
-- [MIMIC-IV on PhysioNet](https://physionet.org/content/mimiciv/3.1/)
-- [MIMIC Code Repository](https://github.com/MIT-LCP/mimic-code)
+欢迎提交 Issue 和 Pull Request！
 
-## License
+## 📄 许可证
 
-MIT
+MIT License
