@@ -1,0 +1,23 @@
+{
+  "name": "mimic-skill",
+  "owner": {
+    "name": "yongfanbeta",
+    "email": "yongfanbeta@gmail.com"
+  },
+  "metadata": {
+    "description": "MIMIC-IV ICU Database Query Skill for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "mimic-skill",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/yongfanbeta/mimic-skill.git"
+      },
+      "description": "从 MIMIC-IV 重症监护数据库提取 ICU 患者数据（生命体征/实验室检查/诊断/合并症）。支持 SQL 和 Python (psycopg2) 两种查询方式。",
+      "version": "1.0.0",
+      "strict": true
+    }
+  ]
+}
