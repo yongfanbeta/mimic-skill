@@ -1,6 +1,6 @@
 # MIMIC-Skill
 
-从 MIMIC-IV 重症监护数据库提取 ICU 患者数据的 OpenClaw Skill。
+从 MIMIC-IV 重症监护数据库提取 ICU 患者数据的 OpenClaw Skill / Claude Code Plugin。
 
 提供 SQL 和 Python (psycopg2) 查询模板，支持提取生命体征、实验室检查、诊断、合并症等数据。
 
@@ -24,21 +24,34 @@ openclaw skill install ./mimic-skill.skill
 **方法1：从统一市场安装（推荐）**
 
 ```bash
-# 添加插件市场（包含 mimic-skill 和 eicu-skill）
-/plugin marketplace add yongfanbeta/mimic-eicu-marketplace
+# 步骤1：添加 OAMD 插件市场（包含 mimic-skill 和 eicu-skill）
+/plugin marketplace add https://github.com/yongfanbeta/OAMD-marketplace
 
-# 安装 mimic-skill
-/plugin install mimic-skill@mimic-eicu-marketplace
+# 步骤2：安装 mimic-skill
+/plugin install mimic-skill
 
-# 重载插件系统
+# 步骤3：重载插件系统
 /reload-plugins
 ```
 
-**方法2：从 GitHub 直接安装**
+**方法2：从 GitHub 仓库直接安装（单个仓库）**
 
-在 Claude Code 中输入：
+```bash
+# 添加单个仓库作为 marketplace
+/plugin marketplace add https://github.com/yongfanbeta/mimic-skill
+
+# 安装插件
+/plugin install mimic-skill
 ```
-/plugin install https://github.com/yongfanbeta/mimic-skill
+
+**方法3：本地开发模式（测试用）**
+
+```bash
+# 克隆仓库到本地
+git clone https://github.com/yongfanbeta/mimic-skill.git ~/.claude/plugins/mimic-skill
+
+# 启动 Claude Code 并加载插件
+claude --plugin-dir ~/.claude/plugins/mimic-skill
 ```
 
 ### Codex 用户
@@ -98,7 +111,7 @@ mimic-skill
 
 1. **MIMIC-IV 变化**（vs MIMIC-III）：
    - 表名变化：`icustay_id` → `stay_id`
-   - 新表：`ingredientevents`, `datetimeevents`, `emar` 等
+   - 新表：`ingredients`, `datetimeevents`, `emar` 等
    - 模块化：分为 hosp、icu、ed、cxr、note、ecg 6 个模块
 
 2. **数据库连接**：
@@ -113,8 +126,9 @@ mimic-skill
 
 - [MIMIC-IV 官方文档](https://mimic.mit.edu/docs/IV/)
 - [MIMIC-IV 数据介绍](https://physionet.org/content/mimiciv/3.1/)
-- [MIMIC Code 仓库](https://github.com/MIT-LCP/mimic-code)
 - [访问申请](https://physionet.org/register/)
+- [MIMIC Code 仓库](https://github.com/MIT-LCP/mimic-code)
+- [eICU-Code 官方仓库](https://github.com/MIT-LCP/eicu-code)
 
 ## 📦 发布文件
 
