@@ -2,7 +2,10 @@
   "name": "mimic-skill",
   "version": "1.0.0",
   "description": "从 MIMIC-IV 重症监护数据库提取 ICU 患者数据（生命体征/实验室检查/诊断/合并症）。支持 SQL 和 Python (psycopg2) 两种查询方式。",
-  "author": "yongfanbeta",
+  "author": {
+    "name": "yongfanbeta",
+    "email": "yongfanbeta@gmail.com"
+  },
   "repository": "https://github.com/yongfanbeta/mimic-skill",
   "main": "SKILL.md",
   "keywords": ["medical", "database", "postgresql", "icu", "mimic", "healthcare"],
