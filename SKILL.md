@@ -1,7 +1,9 @@
 ---
 name: mimic-skill
-description: 从 MIMIC-IV 重症监护数据库中提取数据的专用技能。当用户提到 MIMIC、MIMIC-IV、查询 MIMIC 数据、提取 ICU 患者数据（生命体征/实验室检查/诊断/合并症）且涉及 MIMIC 数据库时使用此技能。支持 SQL 和 Python (psycopg2) 两种查询方式，数据通过 PostgreSQL 连接。
+description: "从 MIMIC-IV 重症监护数据库提取 ICU 患者数据（生命体征/实验室检查/诊断/合并症）。当用户提到 MIMIC、MIMIC-IV、MIMIC-IV、查询 MIMIC 数据、提取 ICU 数据、重症数据库查询、重症医学数据挖掘、MIMIC 数据分析、ICU 患者数据提取时使用此技能。支持 SQL 和 Python (psycopg2) 两种查询方式，需用户自行提供 PostgreSQL 连接参数。Do NOT use for eICU data (use eicu-skill instead).
 ---
+
+# MIMIC-IV Data Extraction Skill
 
 # MIMIC-IV Data Extraction Skill
 

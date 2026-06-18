@@ -1,0 +1,16 @@
+{
+  "name": "mimic-skill",
+  "version": "1.0.0",
+  "description": "Query the MIMIC-IV database and generate SQL/Python code for extracting ICU data (vital signs, labs, diagnoses) from PostgreSQL.",
+  "author": "yongfanbeta",
+  "repository": "https://github.com/yongfanbeta/mimic-skill",
+  "main": "SKILL.md",
+  "keywords": ["medical", "database", "postgresql", "icu", "mimic", "healthcare"],
+  "engines": {
+    "codex": ">=1.0.0"
+  },
+  "installation": {
+    "type": "github",
+    "url": "https://github.com/yongfanbeta/mimic-skill"
+  }
+}
